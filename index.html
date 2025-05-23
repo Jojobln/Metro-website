@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LSPD Metropolitan Division</title>
+<style>
+  /* Farbvariablen */
+  :root {
+    --bg-dark: #000;
+    --bg-dark-alt: #111;
+    --bg-darker: #222;
+    --text-light: #fff;
+    --text-red: #ff0000;
+    --border-red: #ff0000;
+    --btn-red: #b30000;
+    --btn-red-hover: #ff0000;
+  }
+
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-light);
+  }
+  .header, .footer {
+    background-color: var(--bg-dark-alt);
+    color: var(--text-light);
+    padding: 20px;
+    text-align: center;
+  }
+  .nav {
+    background-color: var(--bg-darker);
+    padding: 10px;
+    text-align: center;
+  }
+  .nav a {
+    color: var(--text-light);
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  .nav a:hover {
+    color: var(--text-red);
+  }
+  .content {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+  }
+  h2, h3 {
+    color: var(--text-red);
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--border-red);
+    margin-bottom: 20px;
+  }
+  .tactic-section {
+    margin-bottom: 40px;
+  }
+
+  /* Button Styles */
+  button {
+    background-color: var(--btn-red);
+    color: var(--text-light);
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: var(--btn-red-hover);
+  }
+
+  /* Auth Section Styles */
+  #authSection {
+    max-width: 480px;
+    margin: 40px auto;
+    padding: 20px;
+    background: var(--bg-dark-alt);
+    border-radius: 8px;
+    box-shadow: 0 0 15px var(--border-red);
+  }
+
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--border-red);
+  }
+
+  .auth-tabs .tab {
+    flex: 1;
+    padding: 10px 0;
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-light);
+    font-weight: 600;
+    transition: border-color 0.3s ease;
+  }
+
+  .auth-tabs .tab:hover {
+    border-bottom-color: var(--text-red);
+  }
+
+  .auth-tabs .tab.active {
+    border-bottom-color: var(--text-red);
+    font-weight: 700;
+  }
+
+  .auth-form input {
+    width: 100%;
+    margin: 8px 0 16px 0;
+    padding: 10px;
+    border: 1px solid var(--border-red);
+    border-radius: 5px;
+    font-size: 1rem;
+    color: var(--text-light);
+    background: var(--bg-dark);
+    transition: border-color 0.3s ease;
+  }
+
+  .auth-form input:focus {
+    outline: none;
+    border-color: var(--text-red);
+    box-shadow: 0 0 5px var(--text-red);
+  }
+
+  .auth-form button {
+    width: 100%;
+  }
+
+  .message {
+    height: 18px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+    color: #ff6666;
+  }
+
+  /* Logout Button in Nav */
+  #logoutBtn {
+    display: none;
+    margin-left: 10px;
+  }
+
+  /* Admin Users Link */
+  #adminUsersLink {
+    display: none;
+    color: var(--text-light);
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 15px;
+  }
+
+  /* Admin Portal Styles */
+  #adminUsersSection {
+    max-width: 900px;
+    margin: 40px auto;
+    background: var(--bg-dark-alt);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px var(--border-red);
+  }
+  #adminUsersSection table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-light);
+  }
+  #adminUsersSection th, #adminUsersSection td {
+    border: 1px solid var(--border-red);
+    padding: 8px;
+    text-align: center;
+  }
+  #adminUsersSection th {
+    background-color: var(--bg-darker);
+  }
+  #adminUsersSection button {
+    padding: 5px 8px;
+    font-size: 0.9rem;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LSPD Metropolitan Division</h1>
+  <p>Taktiken & Einsatzerfahrung</p>
+</div>
+
+<div class="nav">
+  <a href="#" onclick="showSection('start')">Start</a>
+  <a href="#" onclick="showSection('taktiken')">Taktiken</a>
+  <a href="#" onclick="showSection('waffen')">Waffen</a>
+  <a href="#" onclick="showSection('termine')">Termine</a>
+  <a href="#" onclick="showSection('news')">News</a>
+  <a href="#" onclick="showSection('bewerbungen')">Bewerbungen</a>
+  <a href="#" id="adminUsersLink" onclick="showSection('adminUsers')">Admin: Benutzerverwaltung</a>
+  <button id="logoutBtn" onclick="logout()">Logout</button>
+</div>
+
+<!-- Auth Section: Login & Registrierung -->
+<section id="authSection">
+  <div class="auth-tabs">
+    <button id="loginTab" class="tab active" onclick="switchAuthTab('login')">Login</button>
+    <button id="registerTab" class="tab" onclick="switchAuthTab('register')">Registrieren</button>
+  </div>
+
+  <div id="loginForm" class="auth-form">
+    <h2>Login</h2>
+    <input id="loginUser" type="text" placeholder="Benutzername" autocomplete="username" />
+    <input id="loginPass" type="password" placeholder="Passwort" autocomplete="current-password" />
+    <div id="loginMessage" class="message"></div>
+    <button onclick="login()">Einloggen</button>
+  </div>
+
+  <div id="registerForm" class="auth-form" style="display:none;">
+    <h2>Registrieren</h2>
+    <input id="regUser" type="text" placeholder="Benutzername" autocomplete="username" />
+    <input id="regPass" type="password" placeholder="Passwort" autocomplete="new-password" />
+    <div id="registerMessage" class="message"></div>
+    <button onclick="register()">Registrieren</button>
+  </div>
+</section>
+
+<!-- Start Section -->
+<section id="start" class="content section" style="display:none;">
+  <h2>Willkommen bei der LSPD Metropolitan Division</h2>
+  <p>Wähle im Menü eine Seite aus.</p>
+</section>
+
+<!-- Taktiken Section -->
+<section id="taktiken" class="content section" style="display:none;">
+  <h2>Taktiken der Metropolitan Division</h2>
+
+  <div class="tactic-section">
+    <h3>1. Dynamic Entry (Dynamischer Zugriff)</h3>
+    <p>Der dynamische Zugriff wird genutzt, um eine potenziell feindliche Umgebung schnell zu sichern. Einsatzkräfte nutzen Stoßtrupp-Taktiken, arbeiten eng zusammen und verwenden meist Blendgranaten zur Ablenkung. Kommunikation und klare Rollenverteilung sind entscheidend.</p>
+  </div>
+
+  <div class="tactic-section">
+    <h3>2. Perimeter Setup (Absicherung von Einsatzorten)</h3>
+    <p>Vor Betreten eines Gebäudes wird ein externer Sicherungsring aufgebaut. Dies verhindert das Entkommen von Zielpersonen und schützt die Zivilbevölkerung. Officers kommunizieren über Funk, während Teamleiter das Gelände analysieren.</p>
+  </div>
+
+  <div class="tactic-section">
+    <h3>3. Vehicle Assault (Fahrzeugübernahme)</h3>
+    <p>Speziell bei Entführungen oder bewaffneten Flüchtigen wird diese Taktik angewandt. Mehrere Fahrzeuge blockieren das Ziel, das Zugriffsteam nähert sich mit Ballistik-Schilden. Ziel ist es, die Insassen unter Kontrolle zu bringen, ohne Schüsse abzugeben.</p>
+  </div>
+
+  <div class="tactic-section">
+    <h3>4. Riot Control (Kontrolle bei Ausschreitungen)</h3>
+    <p>Die Metropolitan Division ist spezialisiert auf Crowd Control. Es werden Schutzschilde, Reizgas und nicht-tödliche Mittel eingesetzt, um die öffentliche Ordnung wiederherzustellen. Jede Einheit hat eine feste Rolle: Schildträger, Beobachter, Verstärkung.</p>
+  </div>
+
+  <div class="tactic-section">
+    <h3>5. Active Shooter Response (Sofortmaßnahme bei aktiven Schützen)</h3>
+    <p>Diese Taktik erfordert sofortiges Handeln. Die erste Einheit geht zügig in das Gebäude und sucht den Täter, um weiteren Schaden zu verhindern. Warten auf Spezialkräfte ist in der Regel keine Option.</p>
+  </div>
+</section>
+
+<!-- Waffen Section -->
+<section id="waffen" class="content section" style="display:none;">
+  <h2>Waffen der Metropolitan Division</h2>
+  <p>Hier könnten Informationen zu Waffen und Ausrüstung stehen.</p>
+</section>
+
+<!-- Termine Section -->
+<section id="termine" class="content section" style="display:none;">
+  <h2>Termine</h2>
+  <div id="termineList"></div>
+  <div id="termineAdminControls" style="display:none;">
+    <h3>Termin hinzufügen / bearbeiten</h3>
+    <input type="text" id="terminTitel" placeholder="Titel" />
+    <input type="date" id="terminDatum" />
+    <button onclick="addOrUpdateTermin()">Speichern</button>
+    <button onclick="cancelTerminEdit()">Abbrechen</button>
+  </div>
+</section>
+
+<!-- News Section -->
+<section id="news" class="content section" style="display:none;">
+  <h2>News</h2>
+  <div id="newsList"></div>
+  <div id="newsAdminControls" style="display:none;">
+    <h3>News hinzufügen / bearbeiten</h3>
+    <input type="text" id="newsTitel" placeholder="Titel" />
+    <textarea id="newsText" placeholder="Text"></textarea>
+    <button onclick="addOrUpdateNews()">Speichern</button>
+    <button onclick="cancelNewsEdit()">Abbrechen</button>
+  </div>
+</section>
+
+<!-- Bewerbungen Section -->
+<section id="bewerbungen" class="content section" style="display:none;">
+  <h2>Bewerbungen</h2>
+  <div id="bewerbungenList"></div>
+  <div id="bewerbungenAdminControls" style="display:none;">
+    <h3>Bewerbung hinzufügen / bearbeiten</h3>
+    <input type="text" id="bewerbungName" placeholder="Name" />
+    <textarea id="bewerbungText" placeholder="Text"></textarea>
+    <button onclick="addOrUpdateBewerbung()">Speichern</button>
+    <button onclick="cancelBewerbungEdit()">Abbrechen</button>
+  </div>
+</section>
+
+<!-- Admin Benutzerverwaltung -->
+<section id="adminUsers" class="content section" style="display:none;">
+  <h2>Benutzerverwaltung (Admin)</h2>
+  <table>
+    <thead>
+      <tr><th>Benutzername</th><th>Admin</th><th>Aktionen</th></tr>
+    </thead>
+    <tbody id="userTableBody"></tbody>
+  </table>
+</section>
+
+<!-- Access Denied -->
+<section id="accessDenied" class="content section" style="display:none; text-align:center; color: var(--text-red);">
+  <h2>Zugriff verweigert</h2>
+  <p>Du hast keine Berechtigung, diese Seite zu sehen.</p>
+  <button onclick="logout()">Zurück zum Login</button>
+</section>
+
+<footer class="footer">
+  &copy; 2025 LSPD Metropolitan Division – All rights reserved
+</footer>
+
+<script>
+  // Datenmodelle im LocalStorage
+  const STORAGE_KEYS = {
+    USERS: 'lspd_users',
+    CURRENT_USER: 'lspd_current_user',
+    TERMINE: 'lspd_termine',
+    NEWS: 'lspd_news',
+    BEWERBUNGEN: 'lspd_bewerbungen'
+  };
+
+  // Admin-Standardaccount (nicht löschbar, immer Admin)
+  const DEFAULT_ADMIN = { username: 'Pringle', password: 'metrosecure', isAdmin: true };
+
+  // Global state
+  let currentUser = null;
+  let editingTerminId = null;
+  let editingNewsId = null;
+  let editingBewerbungId = null;
+
+  // Hilfsfunktionen
+  function loadUsers() {
+    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
+    if(!users) {
+      // Standardadmin anlegen, falls nicht vorhanden
+      users = [DEFAULT_ADMIN];
+      localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    }
+    return users;
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+  }
+
+  function getCurrentUser() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.CURRENT_USER));
+  }
+
+  function setCurrentUser(user) {
+    if(user)
+      localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
+    else
+      localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
+  }
+
+  function loadTermine() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.TERMINE)) || [];
+  }
+  function saveTermine(arr) {
+    localStorage.setItem(STORAGE_KEYS.TERMINE, JSON.stringify(arr));
+  }
+
+  function loadNews() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.NEWS)) || [];
+  }
+  function saveNews(arr) {
+    localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(arr));
+  }
+
+  function loadBewerbungen() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.BEWERBUNGEN)) || [];
+  }
+  function saveBewerbungen(arr) {
+    localStorage.setItem(STORAGE_KEYS.BEWERBUNGEN, JSON.stringify(arr));
+  }
+
+  // UI Steuerung Sections
+  function showSection(id) {
+    // Sections verstecken
+    const sections = document.querySelectorAll('section.content, section#adminUsers, section#accessDenied');
+    sections.forEach(s => s.style.display = 'none');
+
+    // Access Check bei admin Bereich
+    if(id === 'adminUsers') {
+      if(!currentUser || !currentUser.isAdmin) {
+        showSection('accessDenied');
+        return;
+      }
+      renderUserTable();
+    }
+
+    // Falls User nicht eingeloggt und Bereich nicht Auth, dann zurück zum Login
+    if(id !== 'authSection' && !currentUser) {
+      document.getElementById('authSection').style.display = 'block';
+      return;
+    }
+
+    // Sections anzeigen
+    if(id !== 'authSection')
+      document.getElementById('authSection').style.display = 'none';
+    document.getElementById(id).style.display = 'block';
+
+    // Admin Controls einblenden wenn nötig
+    toggleAdminControls();
+
+    // Inhalte laden bei Termine, News, Bewerbungen
+    if(id === 'termine') renderTermine();
+    if(id === 'news') renderNews();
+    if(id === 'bewerbungen') renderBewerbungen();
+  }
+
+  // Login & Registrierung
+  function switchAuthTab(tab) {
+    document.getElementById('loginForm').style.display = (tab === 'login') ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = (tab === 'register') ? 'block' : 'none';
+
+    document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+    document.getElementById('registerTab').classList.toggle('active', tab === 'register');
+
+    // Clear messages
+    document.getElementById('loginMessage').textContent = '';
+    document.getElementById('registerMessage').textContent = '';
+  }
+
+  function login() {
+    const username = document.getElementById('loginUser').value.trim();
+    const password = document.getElementById('loginPass').value;
+
+    if(!username || !password) {
+      document.getElementById('loginMessage').textContent = 'Bitte Benutzername und Passwort eingeben.';
+      return;
+    }
+
+    const users = loadUsers();
+    const user = users.find(u => u.username === username && u.password === password);
+    if(user) {
+      currentUser = user;
+      setCurrentUser(user);
+      initAfterLogin();
+      showSection('start');
+    } else {
+      document.getElementById('loginMessage').textContent = 'Benutzername oder Passwort falsch.';
+    }
+  }
+
+  function register() {
+    const username = document.getElementById('regUser').value.trim();
+    const password = document.getElementById('regPass').value;
+
+    if(!username || !password) {
+      document.getElementById('registerMessage').textContent = 'Bitte alle Felder ausfüllen.';
+      return;
+    }
+    if(password.length < 6) {
+      document.getElementById('registerMessage').textContent = 'Passwort muss mindestens 6 Zeichen haben.';
+      return;
+    }
+
+    let users = loadUsers();
+    if(users.find(u => u.username === username)) {
+      document.getElementById('registerMessage').textContent = 'Benutzername ist bereits vergeben.';
+      return;
+    }
+
+    const newUser = { username, password, isAdmin: false };
+    users.push(newUser);
+    saveUsers(users);
+    document.getElementById('registerMessage').style.color = '#66ff66';
+    document.getElementById('registerMessage').textContent = 'Registrierung erfolgreich! Bitte einloggen.';
+    // Optional direkt login oder auf Login Tab wechseln
+    setTimeout(() => switchAuthTab('login'), 1500);
+  }
+
+  function logout() {
+    currentUser = null;
+    setCurrentUser(null);
+    document.getElementById('logoutBtn').style.display = 'none';
+    document.getElementById('adminUsersLink').style.display = 'none';
+    showSection('authSection');
+  }
+
+  // Nach Login UI anpassen
+  function initAfterLogin() {
+    document.getElementById('logoutBtn').style.display = 'inline-block';
+    if(currentUser.isAdmin) {
+      document.getElementById('adminUsersLink').style.display = 'inline-block';
+    } else {
+      document.getElementById('adminUsersLink').style.display = 'none';
+    }
+  }
+
+  // Admin Controls ein-/ausblenden für Termine, News, Bewerbungen
+  function toggleAdminControls() {
+    const isAdmin = currentUser && currentUser.isAdmin;
+    document.getElementById('termineAdminControls').style.display = isAdmin ? 'block' : 'none';
+    document.getElementById('newsAdminControls').style.display = isAdmin ? 'block' : 'none';
+    document.getElementById('bewerbungenAdminControls').style.display = isAdmin ? 'block' : 'none';
+  }
+
+  // TERMINE Funktionen
+  function renderTermine() {
+    const termine = loadTermine();
+    const container = document.getElementById('termineList');
+    if(termine.length === 0) {
+      container.innerHTML = '<p>Keine Termine vorhanden.</p>';
+      return;
+    }
+    container.innerHTML = '<ul>' + termine.map((t,i) => 
+      `<li><strong>${t.titel}</strong> - ${t.datum}
+      ${currentUser && currentUser.isAdmin ? `<button onclick="editTermin(${i})">Bearbeiten</button> <button onclick="deleteTermin(${i})">Löschen</button>` : ''}
+      </li>`).join('') + '</ul>';
+  }
+
+  function addOrUpdateTermin() {
+    const titel = document.getElementById('terminTitel').value.trim();
+    const datum = document.getElementById('terminDatum').value;
+
+    if(!titel || !datum) {
+      alert('Bitte Titel und Datum eingeben.');
+      return;
+    }
+
+    let termine = loadTermine();
+    if(editingTerminId === null) {
+      termine.push({ titel, datum });
+    } else {
+      termine[editingTerminId] = { titel, datum };
+    }
+    saveTermine(termine);
+    editingTerminId = null;
+    clearTerminForm();
+    renderTermine();
+  }
+
+  function editTermin(index) {
+    const termine = loadTermine();
+    if(index < 0 || index >= termine.length) return;
+    editingTerminId = index;
+    document.getElementById('terminTitel').value = termine[index].titel;
+    document.getElementById('terminDatum').value = termine[index].datum;
+    document.getElementById('termineAdminControls').style.display = 'block';
+  }
+
+  function deleteTermin(index) {
+    if(!confirm('Termin wirklich löschen?')) return;
+    let termine = loadTermine();
+    termine.splice(index, 1);
+    saveTermine(termine);
+    renderTermine();
+  }
+
+  function cancelTerminEdit() {
+    editingTerminId = null;
+    clearTerminForm();
+  }
+
+  function clearTerminForm() {
+    document.getElementById('terminTitel').value = '';
+    document.getElementById('terminDatum').value = '';
+  }
+
+  // NEWS Funktionen
+  function renderNews() {
+    const newsArr = loadNews();
+    const container = document.getElementById('newsList');
+    if(newsArr.length === 0) {
+      container.innerHTML = '<p>Keine News vorhanden.</p>';
+      return;
+    }
+    container.innerHTML = newsArr.map((n,i) => `
+      <article style="border-bottom:1px solid var(--border-red); margin-bottom: 10px;">
+        <h3>${n.titel}</h3>
+        <p>${n.text.replace(/\n/g, '<br>')}</p>
+        ${currentUser && currentUser.isAdmin ? `<button onclick="editNews(${i})">Bearbeiten</button> <button onclick="deleteNews(${i})">Löschen</button>` : ''}
+      </article>
+    `).join('');
+  }
+
+  function addOrUpdateNews() {
+    const titel = document.getElementById('newsTitel').value.trim();
+    const text = document.getElementById('newsText').value.trim();
+
+    if(!titel || !text) {
+      alert('Bitte Titel und Text eingeben.');
+      return;
+    }
+
+    let newsArr = loadNews();
+    if(editingNewsId === null) {
+      newsArr.unshift({ titel, text });
+    } else {
+      newsArr[editingNewsId] = { titel, text };
+    }
+    saveNews(newsArr);
+    editingNewsId = null;
+    clearNewsForm();
+    renderNews();
+  }
+
+  function editNews(index) {
+    const newsArr = loadNews();
+    if(index < 0 || index >= newsArr.length) return;
+    editingNewsId = index;
+    document.getElementById('newsTitel').value = newsArr[index].titel;
+    document.getElementById('newsText').value = newsArr[index].text;
+    document.getElementById('newsAdminControls').style.display = 'block';
+  }
+
+  function deleteNews(index) {
+    if(!confirm('News wirklich löschen?')) return;
+    let newsArr = loadNews();
+    newsArr.splice(index,1);
+    saveNews(newsArr);
+    renderNews();
+  }
+
+  function cancelNewsEdit() {
+    editingNewsId = null;
+    clearNewsForm();
+  }
+
+  function clearNewsForm() {
+    document.getElementById('newsTitel').value = '';
+    document.getElementById('newsText').value = '';
+  }
+
+  // BEWERBUNGEN Funktionen
+  function renderBewerbungen() {
+    const bewerbungen = loadBewerbungen();
+    const container = document.getElementById('bewerbungenList');
+    if(bewerbungen.length === 0) {
+      container.innerHTML = '<p>Keine Bewerbungen vorhanden.</p>';
+      return;
+    }
+    container.innerHTML = bewerbungen.map((b,i) => `
+      <article style="border-bottom:1px solid var(--border-red); margin-bottom: 10px;">
+        <h3>${b.name}</h3>
+        <p>${b.text.replace(/\n/g, '<br>')}</p>
+        ${currentUser && currentUser.isAdmin ? `<button onclick="editBewerbung(${i})">Bearbeiten</button> <button onclick="deleteBewerbung(${i})">Löschen</button>` : ''}
+      </article>
+    `).join('');
+  }
+
+  function addOrUpdateBewerbung() {
+    const name = document.getElementById('bewerbungName').value.trim();
+    const text = document.getElementById('bewerbungText').value.trim();
+
+    if(!name || !text) {
+      alert('Bitte Name und Text eingeben.');
+      return;
+    }
+
+    let bewerbungen = loadBewerbungen();
+    if(editingBewerbungId === null) {
+      bewerbungen.unshift({ name, text });
+    } else {
+      bewerbungen[editingBewerbungId] = { name, text };
+    }
+    saveBewerbungen(bewerbungen);
+    editingBewerbungId = null;
+    clearBewerbungForm();
+    renderBewerbungen();
+  }
+
+  function editBewerbung(index) {
+    const bewerbungen = loadBewerbungen();
+    if(index < 0 || index >= bewerbungen.length) return;
+    editingBewerbungId = index;
+    document.getElementById('bewerbungName').value = bewerbungen[index].name;
+    document.getElementById('bewerbungText').value = bewerbungen[index].text;
+    document.getElementById('bewerbungenAdminControls').style.display = 'block';
+  }
+
+  function deleteBewerbung(index) {
+    if(!confirm('Bewerbung wirklich löschen?')) return;
+    let bewerbungen = loadBewerbungen();
+    bewerbungen.splice(index, 1);
+    saveBewerbungen(bewerbungen);
+    renderBewerbungen();
+  }
+
+  function cancelBewerbungEdit() {
+    editingBewerbungId = null;
+    clearBewerbungForm();
+  }
+
+  function clearBewerbungForm() {
+    document.getElementById('bewerbungName').value = '';
+    document.getElementById('bewerbungText').value = '';
+  }
+
+  // Admin Benutzerverwaltung
+  function renderUserTable() {
+    const users = loadUsers();
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = '';
+    users.forEach((user, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${user.username}</td>
+        <td><input type="checkbox" ${user.isAdmin ? 'checked' : ''} ${user.username === '${DEFAULT_ADMIN.username}' ? 'disabled' : ''} onchange="toggleAdmin(${idx}, this.checked)"></td>
+        <td>
+          ${user.username === '${DEFAULT_ADMIN.username}' ? '' : `<button onclick="deleteUser(${idx})">Löschen</button>`}
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function toggleAdmin(index, isAdmin) {
+    let users = loadUsers();
+    if(users[index].username === DEFAULT_ADMIN.username) {
+      alert('Der Standard-Admin kann nicht entzogen werden.');
+      renderUserTable();
+      return;
+    }
+    users[index].isAdmin = isAdmin;
+    saveUsers(users);
+    if(currentUser.username === users[index].username) {
+      currentUser.isAdmin = isAdmin;
+      setCurrentUser(currentUser);
+      toggleAdminControls();
+    }
+  }
+
+  function deleteUser(index) {
+    let users = loadUsers();
+    if(users[index].username === DEFAULT_ADMIN.username) {
+      alert('Der Standard-Admin kann nicht gelöscht werden.');
+      return;
+    }
+    if(!confirm(`Benutzer "${users[index].username}" wirklich löschen?`)) return;
+    users.splice(index,1);
+    saveUsers(users);
+    renderUserTable();
+  }
+
+  // Beim Laden prüfen, ob User eingeloggt ist
+  window.onload = () => {
+    currentUser = getCurrentUser();
+    if(currentUser) {
+      initAfterLogin();
+      showSection('start');
+    } else {
+      showSection('authSection');
+    }
+  };
+</script>
+
+</body>
+</html>
